@@ -4,7 +4,7 @@ phases:
   runtime-versions:
    python: 3.7
   command:
-   -aws cloudformation package --template-file template.yaml --s3-bucket codepipeline-us-east-1-337106055010 --output-template-file outputSamTemplate.yaml
+   -aws cloudformation package --template-file template.yaml --s3-bucket lambda-pipeline-bucket-akg --output-template-file outputSamTemplate.yaml
 artifacts:
  type: zip
  files:
