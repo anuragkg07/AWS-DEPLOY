@@ -1,13 +1,12 @@
 version: 0.2
-
 phases:
-	install:
-		runtime-versions:
-			python: 3.7
-		command:
-			-aws cloudformation package --template-file template.yaml --s3-bucket my-bucket --output-template-file outputTemplate.yaml
+ install:
+  runtime-versions:
+   python: 3.7
+  command:
+   -aws cloudformation package --template-file template.yaml --s3-bucket my-bucket --output-template-file outputTemplate.yaml
 artifacts:
-	type: zip
-	files:
-		- template.yaml
-		- outputTemplate.yaml
+ type: zip
+ files:
+  - template.yaml
+  - outputTemplate.yaml
