@@ -1,0 +1,102 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  mail-app
+
+  Sample SAM Template for mail-app
+  
+
+Parameters:
+  StageParameter:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - test
+      - prod
+    Description: Enter dev, test, or prod. Default is dev.
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 20
+
+Resources:
+  EmailApiGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: Email Api Gateway
+      StageName: 
+        Ref: StageParameter
+      EndpointConfiguration:
+        Type: REGIONAL
+     
+
+  EmailMessageDeadLetterQueue:
+      Type: AWS::SQS::Queue
+      Properties: 
+        FifoQueue: true
+        QueueName: emailMessageDeadLetterQueue.fifo
+            
+  EmailMessageQueue:
+      Type: AWS::SQS::Queue
+      Properties: 
+        FifoQueue: true
+        QueueName: emailMessageQueue.fifo
+        RedrivePolicy:
+            deadLetterTargetArn : !GetAtt EmailMessageDeadLetterQueue.Arn
+            maxReceiveCount : 1 
+        
+   
+        
+  MailAppFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: MailAppFunction
+      Handler: com.akg.MailApp::handleRequest
+      Runtime: java8
+      MemorySize: 512
+      Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
+        Variables:
+          EMAIL_QUEUE_NAME: emailMessageQueue.fifo
+      Policies: AmazonSQSFullAccess
+      Events:
+        MailApp:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            RestApiId: !Ref EmailApiGateway
+            Path: /email
+            Method: post
+    
+  ProcessEmailFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ProcessMailFunction
+      Handler: com.akg.ProcessMailApp::handleRequest
+      Runtime: java8
+      MemorySize: 512
+      Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
+        Variables:
+            mail_host: smtp.gmail.com
+            mail_port: 587
+            mail_username: xyz@gmail.com
+            mail_password: ppp@1234
+            mail_transport_protocol: smtp
+            mail_smtp_auth: true
+            mail_smtp_starttls_enable: true
+            mail_debug: true
+      Events:   #https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-function-sqs.html
+        ProcessEmail:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt EmailMessageQueue.Arn
+            BatchSize: 2
+            
+
+Outputs:
+  MailAppFunction:
+    Description: "Hello World Lambda Function ARN"
+    Value: !GetAtt MailAppFunction.Arn
+  MailAppFunctionIamRole:
+    Description: "Implicit IAM Role created for Hello World function"
+    Value: !GetAtt MailAppFunctionRole.Arn
