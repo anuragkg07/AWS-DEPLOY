@@ -1,17 +1,13 @@
 version: 0.2
 phases:
   install:
-    commands:
-      # Install all dependencies (including dependencies for running tests)
-      - echo Install...
-  pre_build:
-    commands:
-      # Discover and run unit tests in the '__tests__' directory
-      - echo prebuild...
-  build:
+    runtime-versions:
+      java: openjdk8
     commands:
       # Use AWS SAM to package the application by using AWS CloudFormation
-      - aws cloudformation package --template template.yml --s3-bucket $S3_BUCKET --output-template-file template-export.yml
+      - aws cloudformation package --template template.yml --s3-bucket lambda-pipeline-bucket-akg --output-template-file template-export.yml
 artifacts:
+  type: zip
   files:
+    - template.yml
     - template-export.yml
