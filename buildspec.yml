@@ -4,7 +4,7 @@ phases:
   runtime-versions:
    java: corretto8
   command:
-   -aws cloudformation package --template-file template.yml --s3-bucket lambda-pipeline-bucket-akg --output-template-file template-export.yml
+   -aws cloudformation package --template-file template.yml --s3-bucket lambda-pipeline-bucket-akg --output-template-file my-lambda-app-BuildArtifact::template-export.yml
 artifacts:
  type: zip
  files:
