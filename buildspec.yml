@@ -1,0 +1,13 @@
+version: 0.2
+phases:
+  install:
+    commands:
+      # Install all dependencies (including dependencies for running tests)
+      - sam build
+  build:
+    commands:
+      # Use AWS SAM to package the application by using AWS CloudFormation
+      - aws cloudformation package --template template.yml --s3-bucket lambda-pipeline-bucket-akg --output-template-file template-export.yml
+artifacts:
+  files:
+    - template-export.yml
