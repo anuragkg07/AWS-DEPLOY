@@ -9,4 +9,4 @@ artifacts:
  type: zip
  files:
   - template.yml
-  - template-export.yml
+  - my-lambda-app-BuildArtifact::template-export.yml
